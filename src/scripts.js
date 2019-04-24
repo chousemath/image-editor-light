@@ -23,11 +23,12 @@ function recover() {
   return false;
 };
 
+const changeCount = () => document.getElementById('count').innerText = `(${index + 1} / ${images.length})`;;
+
 const incrementIndex = () => {
   if (index === (images.length - 1)) return;
   index++;
   changeImage(images[index]);
-  console.log(index, images.length, console.log(images[index]));
 };
 const decrementIndex = () => {
   if (index <= 0) return;
@@ -71,6 +72,7 @@ $(document).keydown((e) => {
 const changeImage = (link) => {
   document.getElementById('car-image').src = link;
   changeBG(link);
+  changeCount();
 };
 
 const changeBG = (link) => {

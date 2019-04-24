@@ -1,0 +1,25 @@
+{
+  "name": "image-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/babel src -d lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chousemath/image-editor-light.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chousemath/image-editor-light/issues"
+  },
+  "homepage": "https://github.com/chousemath/image-editor-light#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3"
+  }
+}
