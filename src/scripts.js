@@ -1,87 +1,83 @@
-let imageMap = {};
-let images = [];
-let index = 0;
 let fileName = '';
+const faded = '0.2';
+
+const loadImages = (images) => {
+  const div = document.getElementById('main-container');
+  while (div.firstChild) div.removeChild(div.firstChild);
+
+  const spacer = document.createElement('div');
+  spacer.className = 'spacer';
+  div.appendChild(spacer);
+
+  for (let i = 0; i < images.length; i++) {
+    const container = document.createElement('div');
+    container.className = 'car-image-container';
+    div.appendChild(container);
+
+    const img = new Image();
+    img.onload = function () { container.appendChild(img); };
+    img.onclick = function () { return handleImageClick(this.id); };
+    img.src = images[i];
+    img.id = `image-${i}`;
+    img.className = 'car-image';
+  }
+};
+
+const addBadImages = (images) => {
+  const div = document.getElementById('main-container');
+  for (let i = 0; i < images.length; i++) {
+    const container = document.createElement('div');
+    container.className = 'car-image-container';
+    div.appendChild(container);
+    const img = new Image();
+    img.onload = function () { container.appendChild(img); };
+    img.onclick = function () { return handleImageClick(this.id); };
+    img.src = images[i];
+    img.id = `image-${i}`;
+    img.className = 'car-image';
+    img.style.opacity = faded;
+  }
+};
 
 function save() {
-  localStorage.setItem('triveimage-imageMap', JSON.stringify(imageMap));
-  localStorage.setItem('triveimage-images', JSON.stringify(images));
-  localStorage.setItem('triveimage-index', JSON.stringify(index));
+
+  const images = document.getElementsByTagName('img');
+  const goodImages = [];
+  const badImages = [];
+
+  for (let image of images) {
+    if (image.style.opacity === faded) badImages.push(image.src);
+    else goodImages.push(image.src);
+  }
+
+  localStorage.setItem('triveimage-good-images', JSON.stringify(goodImages));
+  localStorage.setItem('triveimage-bad-images', JSON.stringify(badImages));
+
   localStorage.setItem('triveimage-fileName', JSON.stringify(fileName));
 
+  alert('Your progress has been saved.');
   return false;
 };
 
 function recover() {
-  imageMap = JSON.parse(localStorage.getItem('triveimage-imageMap'));
-  images = JSON.parse(localStorage.getItem('triveimage-images'));
-  index = JSON.parse(localStorage.getItem('triveimage-index'));
+  const goodImages = JSON.parse(localStorage.getItem('triveimage-good-images'));
+  const badImages = JSON.parse(localStorage.getItem('triveimage-bad-images'));
+  console.log(`goodImages: ${goodImages}`);
+  console.log(`badImages: ${badImages}`);
   fileName = JSON.parse(localStorage.getItem('triveimage-fileName'));
 
-  changeImage(images[index]);
+  loadImages(goodImages);
+  addBadImages(badImages);
 
   return false;
 };
 
-const changeCount = () => document.getElementById('count').innerText = `(${index + 1} / ${images.length})`;;
-
-const incrementIndex = () => {
-  if (index === (images.length - 1)) return;
-  index++;
-  changeImage(images[index]);
-};
-const decrementIndex = () => {
-  if (index <= 0) return;
-  index--;
-  changeImage(images[index]);
-};
-
-const changeImageStatus = () => {
-  const link = images[index];
-  imageMap[link] = !imageMap[link];
-  changeBG(images[index]);
-};
-
-$(document).keydown((e) => {
-  if (images.length <= 0) return;
-  switch (e.which) {
-    case 8: // backspace
-      changeImageStatus();
-      break;
-    case 32: // space
-      changeImageStatus();
-      break;
-    case 37: // left
-      decrementIndex();
-      break;
-    case 38: // up
-      decrementIndex();
-      break;
-    case 39: // right
-      incrementIndex();
-      break;
-    case 40: // down
-      incrementIndex();
-      break;
-    default:
-      return; // exit this handler for other keys
-  }
-  e.preventDefault(); // prevent the default action (scroll / move caret)
-});
-
-const changeImage = (link) => {
-  document.getElementById('car-image').src = link;
-  changeBG(link);
-  changeCount();
-};
-
-const changeBG = (link) => {
-  if (imageMap[link]) {
-    document.getElementById('image-container').style.backgroundColor = 'green';
-  } else {
-    document.getElementById('image-container').style.backgroundColor = 'red';
-  }
-};
+function handleImageClick(id) {
+  console.log(`${id} was clicked`);
+  const image = document.getElementById(id);
+  if (image.style.opacity === faded) image.style.opacity = '1.0';
+  else image.style.opacity = faded;
+}
 
 document.getElementById('input-file')
   .addEventListener('change', getFile);
@@ -97,10 +93,7 @@ function getFile(event) {
 
 function placeFileContent(file) {
   readFileContent(file).then(content => {
-    images = content.split('\n').filter(im => im);
-    for (let image of images) imageMap[image] = true;
-    index = 0;
-    changeImage(images[0]);
+    loadImages(content.split('\n').filter(im => im));
   }).catch(error => console.log(error));
 }
 
@@ -119,12 +112,13 @@ function clickInput() {
 }
 
 function handleDownload() {
-  const keys = Object.keys(imageMap);
+  const images = document.getElementsByTagName('img');
   const goodImages = [];
   const badImages = [];
-  for (let key of keys) {
-    if (imageMap[key]) goodImages.push(key);
-    else badImages.push(key);
+
+  for (let image of images) {
+    if (image.style.opacity === faded) badImages.push(image.src);
+    else goodImages.push(image.src);
   }
 
   let element = document.createElement('a');
