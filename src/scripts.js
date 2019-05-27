@@ -1,3 +1,5 @@
+// https://3ecd987c.ngrok.io/
+
 let fileName = '';
 const faded = '0.2';
 
@@ -9,14 +11,17 @@ const loadImages = (images) => {
   spacer.className = 'spacer';
   div.appendChild(spacer);
 
+  const ngrokInput = document.getElementById('ngrok').value;
+
   for (let i = 0; i < images.length; i++) {
     const container = document.createElement('div');
     container.className = 'car-image-container';
+    container.style.backgroundColor = '#a9d3fb';
     div.appendChild(container);
-
     const img = new Image();
     img.onload = function () { container.appendChild(img); };
     img.onclick = function () { return handleImageClick(this.id); };
+    if (ngrokInput) images[i] = `${ngrokInput}.ngrok.${images[i].split('.ngrok.')[1]}`;
     img.src = images[i];
     img.id = `image-${i}`;
     img.className = 'car-image';
@@ -91,9 +96,21 @@ function getFile(event) {
   }
 }
 
+const forbidden = [
+  'dic.png',
+  'blank.png',
+  'dic2.png',
+  'search.png',
+  'search2.png',
+  'internet.png',
+  'configure.png',
+  'close.png',
+  'forward.png',
+];
+
 function placeFileContent(file) {
   readFileContent(file).then(content => {
-    loadImages(content.split('\n').filter(im => im));
+    loadImages(content.split('\n').filter(im => im && forbidden.some(x => im.indexOf('chrome-extension') === -1)));
   }).catch(error => console.log(error));
 }
 
@@ -123,7 +140,7 @@ function handleDownload() {
 
   let element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(goodImages.join('\n')));
-  element.setAttribute('download', `${fileName}xxxGOOD.txt`);
+  element.setAttribute('download', `${fileName}xxxBAD.txt`);
   element.style.display = 'none';
   document.body.appendChild(element);
   element.click();
@@ -131,7 +148,7 @@ function handleDownload() {
 
   element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(badImages.join('\n')));
-  element.setAttribute('download', `${fileName}xxxBAD.txt`);
+  element.setAttribute('download', `${fileName}xxxGOOD.txt`);
   element.style.display = 'none';
   document.body.appendChild(element);
   element.click();
